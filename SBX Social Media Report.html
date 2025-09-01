@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SPEAKERBOX Report</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chart.js CDN for creating interactive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f3f4f6; /* Light gray background */
+        color: #1f2937; /* Dark gray text color */
+      }
+      .collapsible-header {
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .collapsible-content {
+        display: block;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        max-height: 1000px; /* A large value to allow the content to expand */
+        opacity: 1;
+      }
+      .collapsible-content.hidden {
+        max-height: 0;
+        opacity: 0;
+        padding: 0; /* Remove padding when hidden */
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+      }
+      th,
+      td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      th {
+        background-color: #f9fafb;
+        font-weight: 600;
+      }
+      tr:hover {
+        background-color: #f5f5f5;
+      }
+      .filter-button {
+        padding: 0.5rem 1rem;
+        border-radius: 9999px;
+        font-weight: 500;
+        transition: background-color 0.2s ease;
+      }
+      .filter-button.active {
+        background-color: #1a1a1a; /* Black */
+        color: white;
+      }
+      /* New styling for scrollable table container */
+      .scrollable-table-container {
+        max-height: 400px; /* Set a max height */
+        overflow-y: auto; /* Enable vertical scrolling */
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        background-color: #fff;
+        padding: 1rem;
+      }
+      /* Print-specific CSS */
+      @media print {
+        body {
+          background-color: #fff;
+        }
+        .no-print {
+          display: none !important;
+        }
+        .collapsible-content.hidden {
+          display: block !important;
+          max-height: none !important;
+          opacity: 1 !important;
+        }
+        .collapsible-header {
+          border-bottom: none;
+          margin-bottom: 0;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .scrollable-table-container {
+          max-height: none; /* No max height for print */
+          overflow-y: visible; /* No scrolling for print */
+        }
+      }
+    </style>
+  </head>
+  <body class="p-4 sm:p-8">
+    <div
+      class="max-w-7xl mx-auto bg-white shadow-xl rounded-3xl p-6 sm:p-10 mb-10"
+    >
+      <!-- Dashboard Header -->
+      <img
+        class="max-h-[70px] mb-5 object-contain w-max"
+        src="https://res.cloudinary.com/dghxwxviy/image/upload/v1755693451/black_svg_speakerbox_a7r6im.svg"
+        alt="Speaker Box Logo"
+      />
+      <header
+        class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-10"
+      >
+        <div class="text-center sm:text-left mb-4 sm:mb-0">
+          <h1 class="text-3xl sm:text-5xl font-bold text-[#1a1a1a] mb-2">
+            SPEAKERBOX
+          </h1>
+          <h2 class="text-xl sm:text-2xl text-gray-800 font-medium">
+            Interactive Analytics Report
+          </h2>
+          <p class="text-sm sm:text-lg text-gray-500 mt-2">
+            <span id="dateRange">Last 30 Days (August 1 - August 31)</span>
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-4">
+          <select id="monthSelector" class="px-4 py-2 rounded-full border border-gray-300">
+            <option value="august">August 2025</option>
+            <option value="july">July 2025</option>
+          </select>
+          <button
+            id="printButton"
+            onclick="window.print()"
+            class="no-print bg-[#1a1a1a] text-white px-6 py-3 rounded-full font-semibold shadow-lg hover:bg-[#333333] transition-colors duration-200"
+          >
+            Print Report
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content Grid -->
+      <main class="grid grid-cols-1 md:grid-cols-2 gap-8" id="reportContent">
+        <!-- Instagram Overall Metrics Section -->
+        <section class="bg-gray-100 rounded-2xl p-6 shadow-md">
+          <h3 class="text-2xl font-semibold text-[#1a1a1a] mb-4">
+            Instagram Overall Performance
+          </h3>
+          <div id="overallPerformanceContent">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="instagramViews">114,757</span>
+                <span class="text-gray-500" id="instagramViewsChange">Instagram Views (+43.2%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="instagramInteractions">442</span>
+                <span class="text-gray-500" id="instagramInteractionsChange">Content Interactions (-29.7%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="instagramFollowers">85</span>
+                <span class="text-gray-500" id="instagramFollowersChange">New Followers (-19.0%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="instagramReach">32,416</span>
+                <span class="text-gray-500" id="instagramReachChange">Accounts Reached (+17.1%)</span>
+              </div>
+            </div>
+
+            <!-- Profile Activity -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start">
+                    <span class="text-4xl font-bold text-gray-900" id="instagramVisits">1,710</span>
+                    <span class="text-gray-500" id="instagramVisitsChange">Profile Visits (-2.2%)</span>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start">
+                    <span class="text-4xl font-bold text-gray-900" id="instagramLinkClicks">198</span>
+                    <span class="text-gray-500" id="instagramLinkClicksChange">Link Clicks (-15.0%)</span>
+                </div>
+            </div>
+
+            <!-- Follower Growth Chart -->
+            <div class="bg-white rounded-xl p-4 shadow-sm mb-6 h-72">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                New Followers (<span id="instagramFollowerNet">Net: +85</span>)
+              </h4>
+              <canvas id="followerGrowthChart"></canvas>
+            </div>
+          </div>
+        </section>
+
+        <!-- Facebook Overall Metrics Section -->
+        <section class="bg-gray-100 rounded-2xl p-6 shadow-md">
+          <h3 class="text-2xl font-semibold text-[#1a1a1a] mb-4">
+            Facebook Overall Performance
+          </h3>
+          <div id="facebookOverallPerformanceContent">
+            <!-- Key Metrics -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="facebookViews">126,838</span>
+                <span class="text-gray-500" id="facebookViewsChange">Facebook Views (-22.2%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="facebookInteractions">17</span>
+                <span class="text-gray-500" id="facebookInteractionsChange">Content Interactions (-57.5%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="facebookFollowers">4</span>
+                <span class="text-gray-500" id="facebookFollowersChange">New Followers (-50.0%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="facebookReach">12,008</span>
+                <span class="text-gray-500" id="facebookReachChange">Accounts Reached (-45.1%)</span>
+              </div>
+            </div>
+
+            <!-- Profile Activity -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start">
+                    <span class="text-4xl font-bold text-gray-900" id="facebookVisits">113</span>
+                    <span class="text-gray-500" id="facebookVisitsChange">Facebook Visits (-55.5%)</span>
+                </div>
+                <div class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start">
+                    <span class="text-4xl font-bold text-gray-900" id="facebookLinkClicks">205</span>
+                    <span class="text-gray-500" id="facebookLinkClicksChange">Link Clicks (-50.5%)</span>
+                </div>
+            </div>
+
+            <!-- Follower Growth Chart -->
+            <div class="bg-white rounded-xl p-4 shadow-sm mb-6 h-72">
+              <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                New Followers (<span id="facebookFollowerNet">Net: +4</span>)
+              </h4>
+              <canvas id="facebookFollowerGrowthChart"></canvas>
+            </div>
+          </div>
+        </section>
+        
+        <!-- Google My Business Analytics Section -->
+        <section
+          class="bg-gray-100 rounded-2xl p-6 shadow-md md:col-span-2 mt-8 page-break"
+        >
+          <h3 class="text-2xl font-semibold text-[#1a1a1a] mb-4">
+            Google My Business Analytics
+          </h3>
+          <div id="googleAnalyticsContent">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="googleInteractions">73</span>
+                <span class="text-gray-500" id="googleInteractionsChange">Business Profile Interactions (-31.1%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="googleProfileViews">110</span>
+                <span class="text-gray-500" id="googleProfileViewsChange">Profile Views (+11.1%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="googleCalls">13</span>
+                <span class="text-gray-500" id="googleCallsChange">Calls (-13.3%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="googleDirections">51</span>
+                <span class="text-gray-500" id="googleDirectionsChange">Direction Requests (-32.9%)</span>
+              </div>
+              <div
+                class="bg-white rounded-xl p-4 shadow-sm flex flex-col items-start"
+              >
+                <span class="text-4xl font-bold text-gray-900" id="googleWebsiteClicks">7</span>
+                <span class="text-gray-500" id="googleWebsiteClicksChange">Website Clicks (-53.3%)</span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Search Breakdown -->
+                <div class="bg-white rounded-xl p-4 shadow-sm">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                    Search Breakdown
+                  </h4>
+                  <div class="scrollable-table-container">
+                    <table class="w-full text-sm text-left text-gray-500">
+                      <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr>
+                          <th class="py-3 px-6 rounded-tl-lg">Search Term</th>
+                          <th class="py-3 px-6 rounded-tr-lg">Count</th>
+                        </tr>
+                      </thead>
+                      <tbody id="googleSearchBreakdown">
+                        <tr>
+                          <td class="py-4 px-6 font-medium text-gray-900">
+                            corporate branding agency
+                          </td>
+                          <td class="py-4 px-6">28</td>
+                        </tr>
+                        <tr>
+                          <td class="py-4 px-6 font-medium text-gray-900">
+                            speaker box
+                          </td>
+                          <td class="py-4 px-6">20</td>
+                        </tr>
+                        <tr>
+                          <td class="py-4 px-6 font-medium text-gray-900">
+                            digital marketing agency
+                          </td>
+                          <td class="py-4 px-6">15</td>
+                        </tr>
+                        <tr>
+                          <td class="py-4 px-6 font-medium text-gray-900">
+                            best branding agency
+                          </td>
+                          <td class="py-4 px-6">10</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Platform & Device Breakdown Chart -->
+                <div class="bg-white rounded-xl p-4 shadow-sm h-80">
+                  <h4 class="text-lg font-semibold text-gray-800 mb-2">
+                    Platform & Device Breakdown
+                  </h4>
+                  <canvas id="platformBreakdownChart"></canvas>
+                </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Data objects for July and August
+      const reportData = {
+        july: {
+          dateRange: "Last 30 Days (July 1 - July 31)",
+          instagram: {
+            views: 80149,
+            viewsChange: -9.6,
+            interactions: 629,
+            interactionsChange: -32.3,
+            followers: 105,
+            followersChange: 52.2,
+            reach: 27678,
+            reachChange: -13.1,
+            visits: 1748,
+            visitsChange: -1.1,
+            linkClicks: 233,
+            linkClicksChange: 17.7,
+            followerData: [0, 10, 25, 40, 60, 85, 105],
+          },
+          facebook: {
+            views: 163060,
+            viewsChange: 39.2,
+            interactions: 40,
+            interactionsChange: -21.6,
+            followers: 8,
+            followersChange: 14.3,
+            reach: 21866,
+            reachChange: 30.3,
+            visits: 254,
+            visitsChange: -18.3,
+            linkClicks: 414,
+            linkClicksChange: 95.3,
+            followerData: [0, 2, 4, 6, 7, 8, 8],
+          },
+          google: {
+            interactions: 61,
+            interactionsChange: -32.2,
+            profileViews: 105,
+            profileViewsChange: -12.5,
+            calls: 14,
+            callsChange: 55.6,
+            directions: 42,
+            directionsChange: -42.5,
+            websiteClicks: 5,
+            websiteClicksChange: -37.5,
+            searchTerms: [
+              { term: "corporate branding agency", count: 28 },
+              { term: "speaker box", count: 20 },
+              { term: "digital marketing agency", count: 15 },
+              { term: "best branding agency", count: 10 },
+            ],
+            platformData: [72, 17, 8, 3],
+          },
+        },
+        august: {
+          dateRange: "Last 30 Days (August 1 - August 31)",
+          instagram: {
+            views: 114757,
+            viewsChange: 43.2,
+            interactions: 442,
+            interactionsChange: -29.7,
+            followers: 85,
+            followersChange: -19.0,
+            reach: 32416,
+            reachChange: 17.1,
+            visits: 1710,
+            visitsChange: -2.2,
+            linkClicks: 198,
+            linkClicksChange: -15.0,
+            followerData: [0, 14, 28, 41, 55, 68, 85],
+          },
+          facebook: {
+            views: 126838,
+            viewsChange: -22.2,
+            interactions: 17,
+            interactionsChange: -57.5,
+            followers: 4,
+            followersChange: -50.0,
+            reach: 12008,
+            reachChange: -45.1,
+            visits: 113,
+            visitsChange: -55.5,
+            linkClicks: 205,
+            linkClicksChange: -50.5,
+            followerData: [0, 1, 2, 3, 3, 4, 4],
+          },
+          google: {
+            interactions: 73,
+            interactionsChange: -31.1,
+            profileViews: 110,
+            profileViewsChange: 11.1,
+            calls: 13,
+            callsChange: -13.3,
+            directions: 51,
+            directionsChange: -32.9,
+            websiteClicks: 7,
+            websiteClicksChange: -53.3,
+            searchTerms: [
+              { term: "corporate branding agency", count: 28 },
+              { term: "speaker box", count: 20 },
+              { term: "digital marketing agency", count: 15 },
+              { term: "best branding agency", count: 10 },
+            ],
+            platformData: [72, 17, 8, 3],
+          },
+        },
+      };
+
+      /**
+       * Toggles the visibility of a collapsible content section.
+       * @param {string} contentId The ID of the content element to toggle.
+       */
+      function toggleCollapse(contentId) {
+        const content = document.getElementById(contentId);
+        if (content) {
+          content.classList.toggle("hidden");
+          const iconId = contentId.replace("Content", "Icon");
+          const icon = document.getElementById(iconId);
+          if (icon) {
+            icon.classList.toggle("rotate-180");
+          }
+        }
+      }
+
+      function updateReport(month) {
+        const data = reportData[month];
+        if (!data) return;
+
+        // Update header
+        document.getElementById("dateRange").textContent = data.dateRange;
+
+        // Update Instagram metrics
+        document.getElementById("instagramViews").textContent = data.instagram.views.toLocaleString();
+        document.getElementById("instagramViewsChange").textContent = `Instagram Views (${formatChange(data.instagram.viewsChange)})`;
+        document.getElementById("instagramInteractions").textContent = data.instagram.interactions.toLocaleString();
+        document.getElementById("instagramInteractionsChange").textContent = `Content Interactions (${formatChange(data.instagram.interactionsChange)})`;
+        document.getElementById("instagramFollowers").textContent = data.instagram.followers.toLocaleString();
+        document.getElementById("instagramFollowersChange").textContent = `New Followers (${formatChange(data.instagram.followersChange)})`;
+        document.getElementById("instagramReach").textContent = data.instagram.reach.toLocaleString();
+        document.getElementById("instagramReachChange").textContent = `Accounts Reached (${formatChange(data.instagram.reachChange)})`;
+        document.getElementById("instagramVisits").textContent = data.instagram.visits.toLocaleString();
+        document.getElementById("instagramVisitsChange").textContent = `Profile Visits (${formatChange(data.instagram.visitsChange)})`;
+        document.getElementById("instagramLinkClicks").textContent = data.instagram.linkClicks.toLocaleString();
+        document.getElementById("instagramLinkClicksChange").textContent = `Link Clicks (${formatChange(data.instagram.linkClicksChange)})`;
+        document.getElementById("instagramFollowerNet").textContent = `Net: +${data.instagram.followers}`;
+        
+        // Update Facebook metrics
+        document.getElementById("facebookViews").textContent = data.facebook.views.toLocaleString();
+        document.getElementById("facebookViewsChange").textContent = `Facebook Views (${formatChange(data.facebook.viewsChange)})`;
+        document.getElementById("facebookInteractions").textContent = data.facebook.interactions.toLocaleString();
+        document.getElementById("facebookInteractionsChange").textContent = `Content Interactions (${formatChange(data.facebook.interactionsChange)})`;
+        document.getElementById("facebookFollowers").textContent = data.facebook.followers.toLocaleString();
+        document.getElementById("facebookFollowersChange").textContent = `New Followers (${formatChange(data.facebook.followersChange)})`;
+        document.getElementById("facebookReach").textContent = data.facebook.reach.toLocaleString();
+        document.getElementById("facebookReachChange").textContent = `Accounts Reached (${formatChange(data.facebook.reachChange)})`;
+        document.getElementById("facebookVisits").textContent = data.facebook.visits.toLocaleString();
+        document.getElementById("facebookVisitsChange").textContent = `Facebook Visits (${formatChange(data.facebook.visitsChange)})`;
+        document.getElementById("facebookLinkClicks").textContent = data.facebook.linkClicks.toLocaleString();
+        document.getElementById("facebookLinkClicksChange").textContent = `Link Clicks (${formatChange(data.facebook.linkClicksChange)})`;
+        document.getElementById("facebookFollowerNet").textContent = `Net: +${data.facebook.followers}`;
+
+        // Update Google My Business metrics
+        document.getElementById("googleInteractions").textContent = data.google.interactions.toLocaleString();
+        document.getElementById("googleInteractionsChange").textContent = `Business Profile Interactions (${formatChange(data.google.interactionsChange)})`;
+        document.getElementById("googleProfileViews").textContent = data.google.profileViews.toLocaleString();
+        document.getElementById("googleProfileViewsChange").textContent = `Profile Views (${formatChange(data.google.profileViewsChange)})`;
+        document.getElementById("googleCalls").textContent = data.google.calls.toLocaleString();
+        document.getElementById("googleCallsChange").textContent = `Calls (${formatChange(data.google.callsChange)})`;
+        document.getElementById("googleDirections").textContent = data.google.directions.toLocaleString();
+        document.getElementById("googleDirectionsChange").textContent = `Direction Requests (${formatChange(data.google.directionsChange)})`;
+        document.getElementById("googleWebsiteClicks").textContent = data.google.websiteClicks.toLocaleString();
+        document.getElementById("googleWebsiteClicksChange").textContent = `Website Clicks (${formatChange(data.google.websiteClicksChange)})`;
+        
+        updateCharts(data);
+      }
+      
+      function formatChange(value) {
+        if (value > 0) {
+          return `+${value}%`;
+        }
+        return `${value}%`;
+      }
+
+      function updateTable(data) {
+        const tableBody = document.getElementById("googleSearchBreakdown");
+        tableBody.innerHTML = "";
+        data.forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="py-4 px-6 font-medium text-gray-900">${item.term}</td>
+            <td class="py-4 px-6">${item.count}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+
+      function updateCharts(data) {
+        // Clear old charts to prevent duplicates
+        if (window.instagramFollowerGrowthChart && typeof window.instagramFollowerGrowthChart.destroy === 'function') {
+          window.instagramFollowerGrowthChart.destroy();
+        }
+        if (window.facebookFollowerGrowthChart && typeof window.facebookFollowerGrowthChart.destroy === 'function') {
+          window.facebookFollowerGrowthChart.destroy();
+        }
+        if (window.platformBreakdownChart && typeof window.platformBreakdownChart.destroy === 'function') {
+          window.platformBreakdownChart.destroy();
+        }
+
+        const labels = [
+            "Aug 1", "Aug 5", "Aug 10", "Aug 15", "Aug 20", "Aug 25", "Aug 31",
+        ];
+        
+        // Follower Growth Chart Data
+        const instagramFollowerGrowthData = {
+          labels: labels,
+          datasets: [
+            {
+              label: "New Followers",
+              data: data.instagram.followerData,
+              borderColor: "#1a1a1a",
+              backgroundColor: "rgba(26, 26, 26, 0.2)",
+              fill: true,
+              tension: 0.4,
+            },
+          ],
+        };
+        const facebookFollowerGrowthData = {
+          labels: labels,
+          datasets: [
+            {
+              label: "New Followers",
+              data: data.facebook.followerData,
+              borderColor: "#1a1a1a",
+              backgroundColor: "rgba(26, 26, 26, 0.2)",
+              fill: true,
+              tension: 0.4,
+            },
+          ],
+        };
+        const platformBreakdownData = {
+          labels: [
+            "Google Search - mobile",
+            "Google Maps - mobile",
+            "Google Search - desktop",
+            "Google Maps - desktop",
+          ],
+          datasets: [
+            {
+              data: data.google.platformData,
+              backgroundColor: ["#1a1a1a", "#4a4a4a", "#8a8a8a", "#cccccc"],
+              hoverOffset: 4,
+            },
+          ],
+        };
+
+        const chartOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                font: {
+                  family: "Inter",
+                },
+              },
+            },
+            tooltip: {
+              bodyFont: {
+                family: "Inter",
+              },
+            },
+          },
+        };
+
+        const instagramFollowerGrowthChartCtx = document
+          .getElementById("followerGrowthChart")
+          .getContext("2d");
+        window.instagramFollowerGrowthChart = new Chart(instagramFollowerGrowthChartCtx, {
+          type: "line",
+          data: instagramFollowerGrowthData,
+          options: chartOptions,
+        });
+
+        const facebookFollowerGrowthChartCtx = document
+          .getElementById("facebookFollowerGrowthChart")
+          .getContext("2d");
+        window.facebookFollowerGrowthChart = new Chart(facebookFollowerGrowthChartCtx, {
+          type: "line",
+          data: facebookFollowerGrowthData,
+          options: chartOptions,
+        });
+        
+        const platformBreakdownChartCtx = document.getElementById("platformBreakdownChart").getContext("2d");
+        window.platformBreakdownChart = new Chart(platformBreakdownChartCtx, {
+          type: "doughnut",
+          data: platformBreakdownData,
+          options: chartOptions,
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const monthSelector = document.getElementById("monthSelector");
+        monthSelector.addEventListener("change", (event) => {
+          updateReport(event.target.value);
+        });
+
+        // Initialize the report with August data
+        updateReport("august");
+      });
+    </script>
+  </body>
+</html>
