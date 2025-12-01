@@ -88,6 +88,7 @@
             id="monthSelector"
             class="no-print px-4 py-2 rounded-full border border-gray-300"
           >
+            <option value="november">November 2025</option>
             <option value="october">October 2025</option>
             <option value="september">September 2025</option>
             <option value="august">August 2025</option>
@@ -458,8 +459,55 @@
             { week: "Sep 15 - 21", spent: 1845, leads: 25, cpr: 73.8, qualifiedLeads: null },
             { week: "Sep 22 - 28", spent: 1859, leads: 12, cpr: 154.9, qualifiedLeads: null },
             { week: "Sep 29 - 30", spent: 363, leads: 5, cpr: 72.6, qualifiedLeads: null },
-            // October is a summary, not weekly, so it's handled differently
+            // October and November summaries are added dynamically in updateAdMetrics
           ],
+        },
+        november: {
+          dateRange: "Last 30 Days (November 1 - November 30)",
+          ads: {
+            totalSpent: 7950.51,
+            totalLeads: 107,
+            avgCpr: 74.30,
+            totalQualifiedLeads: 0, 
+            proposalsGiven: 0,
+            agreed: 0,
+            closed: 0,
+          },
+          social: {
+            instagram: {
+              views: 323200, 
+              interactions: 2700, 
+              followers: 181, 
+              reach: 131200, 
+              visits: 3800, 
+              linkClicks: 704, 
+              followerData: [10, 40, 70, 100, 130, 160, 181], 
+            },
+            facebook: {
+              views: 252300, 
+              interactions: 16, 
+              followers: 11, 
+              reach: 116500, 
+              visits: 224, 
+              linkClicks: 97, 
+              followerData: [0, 2, 4, 6, 8, 9, 11],
+            },
+            google: {
+              interactions: 110, 
+              calls: 13, 
+              chatClicks: 4, 
+              bookings: 0, 
+              directions: 92, 
+              websiteClicks: 1, 
+              searchTerms: [
+                { term: "corporate branding agency", count: 35 },
+                { term: "speaker box", count: 28 },
+                { term: "creative ad agency", count: 20 },
+                { term: "social media marketing", count: 15 },
+              ],
+              platformData: [70, 20, 8, 2], 
+            },
+          },
         },
         october: {
           dateRange: "Last 31 Days (October 1 - October 31)",
@@ -467,7 +515,7 @@
             totalSpent: 18305,
             totalLeads: 444,
             avgCpr: 41,
-            totalQualifiedLeads: 54, // Updated
+            totalQualifiedLeads: 54, 
             proposalsGiven: 54,
             agreed: 16,
             closed: 9,
@@ -494,8 +542,8 @@
             google: {
               interactions: 127, interactionsChange: 122.8,
               calls: 18, callsChange: 157.1,
-              chatClicks: 1, chatClicksChange: 0, // Assuming 0 prev,
-              bookings: 0, bookingsChange: 0, // Assuming 0 prev
+              chatClicks: 1, chatClicksChange: 0, 
+              bookings: 0, bookingsChange: 0, 
               directions: 100, directionsChange: 108.3,
               websiteClicks: 8, websiteClicksChange: 300.0,
               searchTerms: [
@@ -703,7 +751,7 @@
 
         if (month === 'all') {
           // 'all' data is an array of weekly reports
-          const allAdsData = [...data, reportData.october.ads]; // Add October summary
+          const allAdsData = [...data, reportData.october.ads, reportData.november.ads]; // Add summaries
           totalSpent = allAdsData.reduce((sum, item) => sum + item.totalSpent, 0);
           totalLeads = allAdsData.reduce((sum, item) => sum + item.totalLeads, 0);
           totalQualifiedLeads = allAdsData.reduce((sum, item) => sum + (item.totalQualifiedLeads || 0), 0);
@@ -736,7 +784,7 @@
         }
         
         // --- Update UI Cards ---
-        const naString = (month === 'july' || month === 'august' || month === 'september') ? 'N/A' : '0';
+        const naString = (month === 'july' || month === 'august' || month === 'september' || month === 'november') ? 'N/A' : '0';
         
         document.getElementById('totalSpent').textContent = formatValue(totalSpent, '₹');
         document.getElementById('spentSubtext').innerHTML = month === 'all' ? 'Total (all months)' : `Monthly total ${formatChange(spentChange)}`;
@@ -888,6 +936,8 @@
           labels = ["Aug 1", "Aug 5", "Aug 10", "Aug 15", "Aug 20", "Aug 25", "Aug 31"];
         } else if (month === "september") {
           labels = ["Sep 1", "Sep 5", "Sep 10", "Sep 15", "Sep 20", "Sep 25", "Sep 30"];
+        } else if (month === "november") {
+          labels = ["Nov 1", "Nov 5", "Nov 10", "Nov 15", "Nov 20", "Nov 25", "Nov 30"];
         } else {
           // Default to October
           labels = ["Oct 1", "Oct 6", "Oct 11", "Oct 16", "Oct 21", "Oct 26", "Oct 31"];
@@ -961,6 +1011,7 @@
 
         // --- Determine Previous Month for Comparison ---
         let prevMonthKey;
+        if (month === 'november') prevMonthKey = 'october';
         if (month === 'october') prevMonthKey = 'september';
         if (month === 'september') prevMonthKey = 'august';
         if (month === 'august') prevMonthKey = 'july';
@@ -972,14 +1023,14 @@
         // --- Handle 'all' month logic ---
         if (month === 'all') {
             // For 'all', ad data is the 'all' array, social data defaults to latest
-            const latestSocial = reportData.october.social;
-            const prevSocial = reportData.september.social; // Compare latest to previous
+            const latestSocial = reportData.november.social;
+            const prevSocial = reportData.october.social; // Compare latest to previous
             
             updateAdMetrics(data.ads, 'all', null); // 'data.ads' is the weekly array
             updateAdChart(data.ads, 'all');
             
-            updateSocialMetrics(latestSocial, 'october', prevSocial);
-            updateSocialCharts(latestSocial, 'october');
+            updateSocialMetrics(latestSocial, 'november', prevSocial);
+            updateSocialCharts(latestSocial, 'november');
 
         } else {
             // For specific months
@@ -1175,11 +1226,10 @@
           updateReport(event.target.value);
         });
 
-        // Initialize the report with October data
-        updateReport('october');
-        monthSelector.value = 'october';
+        // Initialize the report with November data
+        updateReport('november');
+        monthSelector.value = 'november';
       });
     </script>
   </body>
 </html>
-
