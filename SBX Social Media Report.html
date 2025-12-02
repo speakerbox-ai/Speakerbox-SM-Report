@@ -180,6 +180,22 @@
                 Monthly total
               </p>
             </div>
+            
+            <!-- NEW COLUMN: Proposals from Ad Leads -->
+            <div class="card p-4 sm:p-6 flex flex-col justify-between bg-blue-50 border border-blue-100">
+              <div>
+                <h2 class="text-md font-semibold text-blue-800">
+                  Proposals (Ads)
+                </h2>
+                <p id="proposalsFromAds" class="text-3xl sm:text-4xl font-bold text-blue-900 mt-2">
+                  0
+                </p>
+              </div>
+              <p id="proposalsFromAdsSubtext" class="text-sm text-blue-400 mt-4">
+                From ad leads
+              </p>
+            </div>
+
             <div class="card p-4 sm:p-6 flex flex-col justify-between">
               <div>
                 <h2 class="text-md font-semibold text-gray-500">Agreed</h2>
@@ -193,7 +209,7 @@
             </div>
             <div class="card p-4 sm:p-6 flex flex-col justify-between">
               <div>
-                <h2 class="text-md font-semibold text-gray-500">Closed</h2>
+                <h2 class="text-md font-semibold text-gray-500">Total Closed</h2>
                 <p id="closed" class="text-3xl sm:text-4xl font-bold text-gray-800 mt-2">
                   0
                 </p>
@@ -202,6 +218,22 @@
                 Monthly total
               </p>
             </div>
+
+             <!-- NEW COLUMN: Closed from Ads -->
+             <div class="card p-4 sm:p-6 flex flex-col justify-between bg-green-50 border border-green-100">
+              <div>
+                <h2 class="text-md font-semibold text-green-800">
+                  Closed (Ads)
+                </h2>
+                <p id="closedFromAds" class="text-3xl sm:text-4xl font-bold text-green-900 mt-2">
+                  0
+                </p>
+              </div>
+              <p id="closedFromAdsSubtext" class="text-sm text-green-400 mt-4">
+                From ads only
+              </p>
+            </div>
+
           </div>
 
           <!-- Chart Section -->
@@ -468,10 +500,12 @@
             totalSpent: 7950.51,
             totalLeads: 107,
             avgCpr: 74.30,
-            totalQualifiedLeads: 0, 
-            proposalsGiven: 0,
-            agreed: 0,
-            closed: 0,
+            totalQualifiedLeads: 22, // UPDATED
+            proposalsGiven: 22,      // UPDATED
+            agreed: 12,              // UPDATED to 12
+            closed: 10,              // UPDATED
+            proposalsFromAds: 15,    // NEW FIELD
+            closedFromAds: 5         // UPDATED to 5
           },
           social: {
             instagram: {
@@ -747,7 +781,7 @@
        * @param {object|null} prevData The data for the previous month.
        */
       function updateAdMetrics(data, month, prevData) {
-        let totalSpent, totalLeads, avgCpr, totalQualifiedLeads, proposalsGiven, agreed, closed;
+        let totalSpent, totalLeads, avgCpr, totalQualifiedLeads, proposalsGiven, agreed, closed, proposalsFromAds, closedFromAds;
 
         if (month === 'all') {
           // 'all' data is an array of weekly reports
@@ -758,6 +792,8 @@
           proposalsGiven = allAdsData.reduce((sum, item) => sum + (item.proposalsGiven || 0), 0);
           agreed = allAdsData.reduce((sum, item) => sum + (item.agreed || 0), 0);
           closed = allAdsData.reduce((sum, item) => sum + (item.closed || 0), 0);
+          proposalsFromAds = allAdsData.reduce((sum, item) => sum + (item.proposalsFromAds || 0), 0);
+          closedFromAds = allAdsData.reduce((sum, item) => sum + (item.closedFromAds || 0), 0);
           avgCpr = allAdsData.length > 0 ? allAdsData.reduce((sum, item) => sum + item.avgCpr, 0) / allAdsData.length : 0;
         } else {
           // Monthly data is a single summary object
@@ -768,6 +804,8 @@
           proposalsGiven = data.proposalsGiven;
           agreed = data.agreed;
           closed = data.closed;
+          proposalsFromAds = data.proposalsFromAds;
+          closedFromAds = data.closedFromAds;
         }
 
         // Calculate Percentages
@@ -806,6 +844,10 @@
 
         document.getElementById('closed').textContent = formatValue(closed, '', 0, naString);
         document.getElementById('closedSubtext').innerHTML = month === 'all' ? 'Total (all months)' : `Monthly total ${formatChange(closedChange)}`;
+        
+        // Update New Columns
+        document.getElementById('proposalsFromAds').textContent = formatValue(proposalsFromAds, '', 0, 'N/A');
+        document.getElementById('closedFromAds').textContent = formatValue(closedFromAds, '', 0, 'N/A');
       }
 
       /**
